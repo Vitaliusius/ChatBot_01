@@ -20,19 +20,28 @@ def main():
     while True:
         try:
             response = requests.get(url, headers=headers, timeout=5, params=timestamp)
-            response = response.json()            
-            timestamp.clear()
-            if response.get('timestamp_to_request'):
-                timestamp['timestamp'] = response.get('timestamp_to_request')
-                print(response)
-            elif response.get('status') == 'found':
-            	text = 'Преподаватель проверил работу!'
-                bot.send_message(chat_id=chat_id, text=text)
+            response.raise_for_status()    
+            response = response.json()      
         except requests.exceptions.ReadTimeout:
             continue
         except requests.exceptions.ConnectionError:
-            continue    	
-        sleep(3)
+            time.sleep(3)
+        else:
+            if response.get('timestamp_to_request'):
+                timestamp['timestamp'] = response.get('timestamp_to_request')
+            elif response.get('status') == 'found':
+            	timestamp['timestamp'] = response.get('last_attempt_timestamp')
+            	attempts = response.get("new_attempts")
+            	for attempt in attempts:
+                    url = attempt.get("lesson_url")
+                    title = attempt.get("lesson_title")
+                    if attempt.get("is_negative"):
+                        text_review = "К сожалению, в работе нашлись ошибки."
+                    else:
+                        text_review = "Преподавателю все понравилось, можно приступать к следующему уроку!"
+                    text = f"У вас проверили работу  <<{title}>>\n{text_review}\n{url}"
+                    bot.send_message(chat_id=chat_id, text=text)
+       	
 
 
 if __name__ == "__main__":
