@@ -26,7 +26,8 @@ def main():
                 timestamp['timestamp'] = response.get('timestamp_to_request')
                 print(response)
             elif response.get('status') == 'found':
-                print('Преподаватель проверил работу!')
+            	text = 'Преподаватель проверил работу!'
+                bot.send_message(chat_id=chat_id, text=text)
         except requests.exceptions.ReadTimeout:
             continue
         except requests.exceptions.ConnectionError:
