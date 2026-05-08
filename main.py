@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 import telebot
 
 
-
 def sending_message(headers, url, bot, chat_id):
     timestamp = {}
     while True:
@@ -40,7 +39,7 @@ def sending_message(headers, url, bot, chat_id):
 
 
 def main():
-	load_dotenv()
+    load_dotenv()
     devman_token = env.str('DEVMAN_TOKEN')
     tg_bot_token = env.str('TELEGRAM_BOT_API_KEY')
     bot = telebot.TeleBot(tg_bot_token)
