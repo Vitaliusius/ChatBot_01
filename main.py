@@ -22,6 +22,7 @@ def get_text_for_message(headers, bot, chat_id):
             continue
         except requests.exceptions.ConnectionError:
             time.sleep(3)
+            continue
         else:
             if response.get('timestamp_to_request'):
                 timestamp['timestamp'] = response.get('timestamp_to_request')
