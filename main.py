@@ -1,11 +1,12 @@
 import requests
+import telebot
 from time import sleep
 from environs import env
 from dotenv import load_dotenv
-import telebot
 
 
-def sending_message(headers, url, bot, chat_id):
+def get_text_for_message(headers, bot, chat_id):
+    url = 'https://dvmn.org/api/long_polling/'
     timestamp = {}
     while True:
         try:
@@ -35,7 +36,11 @@ def sending_message(headers, url, bot, chat_id):
                     else:
                         text_review = "Преподавателю все понравилось, можно приступать к следующему уроку!"
                     text = f"У вас проверили работу <<{title}>>\n{text_review}\n{url}"
-                    bot.send_message(chat_id=chat_id, text=text)
+                    send_message(chat_id, text, bot)
+
+
+def send_message(chat_id, text, bot):
+    bot.send_message(chat_id=chat_id, text=text)
 
 
 def main():
@@ -44,11 +49,10 @@ def main():
     tg_bot_token = env.str('TELEGRAM_BOT_API_KEY')
     bot = telebot.TeleBot(tg_bot_token)
     chat_id = env.str("TELEGRAM_CHAT_ID")
-    url = 'https://dvmn.org/api/long_polling/'
     headers = {
         "Authorization": f"Token {devman_token}"
     }
-    sending_message(headers, url, bot, chat_id)
+    get_text_for_message(headers, bot, chat_id)
 
 
 if __name__ == "__main__":
