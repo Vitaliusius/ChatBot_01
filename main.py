@@ -1,5 +1,6 @@
 import requests
 import telebot
+import logging
 from time import sleep
 from environs import env
 from dotenv import load_dotenv
@@ -52,7 +53,20 @@ def main():
     headers = {
         "Authorization": f"Token {devman_token}"
     }
-    get_text_for_message(headers, bot, chat_id)
+
+    class MyLogsHandler(logging.Handler):
+        def emit(self, record):
+            log_entry = self.format(record)
+            self.bot.send_message(chat_id=self.chat_id, text=log_entry)
+
+    logger = logging.getLogger('Logger')
+    logger.setLevel(logging.INFO)
+    logger.addHandler(MyLogsHandler())
+    try:
+        get_text_for_message(headers, bot, chat_id)
+    except Exception as err:
+        logger.error('Бот упал с ошибкой:')
+        logging.exception(err)
 
 
 if __name__ == "__main__":
