@@ -1,6 +1,7 @@
 import requests
 import telebot
 import logging
+
 from time import sleep
 from environs import env
 from dotenv import load_dotenv
@@ -16,7 +17,7 @@ def get_text_for_message(headers, bot, chat_id):
                 headers=headers,
                 timeout=5,
                 params=timestamp
-                )
+            )
             response.raise_for_status()
             response = response.json()
         except requests.exceptions.ReadTimeout:
@@ -54,20 +55,17 @@ def main():
     headers = {
         "Authorization": f"Token {devman_token}"
     }
-
     class MyLogsHandler(logging.Handler):
         def emit(self, record):
             log_entry = self.format(record)
             bot.send_message(chat_id=chat_id, text=log_entry)
-
-    logger = logging.getLogger('Logger')
+    logger = logging.getLogger('MyLogsHandler')
     logger.setLevel(logging.INFO)
     logger.addHandler(MyLogsHandler())
     try:
         get_text_for_message(headers, bot, chat_id)
     except Exception as err:
-        logger.error('Бот упал с ошибкой:')
-        logging.exception(err)
+        logger.error('Бот упал с ошибкой:', exc_info=True)
 
 
 if __name__ == "__main__":
