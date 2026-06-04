@@ -6,13 +6,8 @@ from time import sleep
 from environs import env
 from dotenv import load_dotenv
 
-load_dotenv()
-TG_BOT_TOKEN = env.str('TELEGRAM_BOT_API_KEY')
-BOT = telebot.TeleBot(TG_BOT_TOKEN)
-CHAT_ID = env.str("TELEGRAM_CHAT_ID")
 
-
-def get_review_result(headers):
+def get_review(headers, bot, chat_id):
     url = 'https://dvmn.org/api/long_polling/'
     timestamp = {}
     while True:
@@ -44,33 +39,42 @@ def get_review_result(headers):
                     else:
                         text_review = "Преподавателю все понравилось, можно приступать к следующему уроку!"
                     text = f"У вас проверили работу <<{title}>>\n{text_review}\n{url}"
-                    send_message(text)
+                    send_message(text, bot, chat_id)
 
 
-def send_message(text):
-    BOT.send_message(chat_id=CHAT_ID, text=text)
+def send_message(chat_id, text, bot):
+    bot.send_message(chat_id=chat_id, text=text)
 
 
 class MyLogsHandler(logging.Handler):
+    def __init__(self, bot, chat_id):
+        super().__init__()
+        self.bot = bot
+        self.chat_id = chat_id
+
     def emit(self, record):
         log_entry = self.format(record)
-        BOT.send_message(chat_id=CHAT_ID, text=log_entry)   
+        self.bot.send_message(chat_id=self.chat_id, text=log_entry)
 
 
 def main():
+    load_dotenv()
+    chat_id = env.str("TELEGRAM_CHAT_ID")
+    tg_bot_token = env.str('TELEGRAM_BOT_API_KEY')
+    bot = telebot.TeleBot(tg_bot_token)
     devman_token = env.str('DEVMAN_TOKEN')
     headers = {
         "Authorization": f"Token {devman_token}"
     }
     logger = logging.getLogger('MyLogsHandler')
     logger.setLevel(logging.INFO)
-    logger.addHandler(MyLogsHandler())
+    logger.addHandler(MyLogsHandler(bot, chat_id))
     try:
-        get_review_result(headers)
+        get_review(headers, bot, chat_id)
     except Exception as err:
         logger.error('Бот упал с ошибкой:')
         logger.exception(err)
-        get_review_result(headers)
+        get_review(headers, bot, chat_id)
 
 
 if __name__ == "__main__":
