@@ -39,7 +39,7 @@ def get_review(headers, bot, chat_id):
                     else:
                         text_review = "Преподавателю все понравилось, можно приступать к следующему уроку!"
                     text = f"У вас проверили работу <<{title}>>\n{text_review}\n{url}"
-                    send_message(text, bot, chat_id)
+                    send_message(chat_id, text, bot)
 
 
 def send_message(chat_id, text, bot):
@@ -71,10 +71,8 @@ def main():
     logger.addHandler(MyLogsHandler(bot, chat_id))
     try:
         get_review(headers, bot, chat_id)
-    except Exception as err:
-        logger.error('Бот упал с ошибкой:')
-        logger.exception(err)
-        get_review(headers, bot, chat_id)
+    except Exception:
+        logger.exception('Бот упал с ошибкой:')
 
 
 if __name__ == "__main__":
